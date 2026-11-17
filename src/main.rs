@@ -1,3 +1,5 @@
+use practice_rust::bbb;
+
 fn main() {
-    println!("Hello, world!");
+    bbb::hello_from_bbb();
 }
