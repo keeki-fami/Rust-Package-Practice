@@ -8,7 +8,7 @@ Rustのmodとかの勉強をする。Rustのmodだとかは、ややこしい。
 - [x] ディレクトリ構成（あるある）
 - [x] modを使う。（pubあり）
 - [x] 外部のクレートを使用する
-- [ ] modの中から、さらに別のクレートを使用する。
+- [x] modの中から、さらに別のクレートを使用する。
 
 ## ディレクトリ構成
 クレートのあるある
@@ -95,4 +95,67 @@ fn main() {
     println!("3+5={:?}", num);
 }
 
+```
+
+## modの中から、さらに別のクレートを使用する。
+printer_yanneというパッケージを、subから使用する。mainAppは、subから提供されているAPIだけを直接呼び出す。
+```zsh
+printer_yanne
+├── Cargo.lock
+├── Cargo.toml
+└── src
+    └── lib.rs
+```
+printer_yanne/src/lib.rs
+```Rust
+pub mod yanne {
+    pub fn print_yanne(text: String) {
+	println!("{:?}やんね", text);
+    }
+}
+```
+
+subでは、こうする
+sub/src/lib.rs
+```diff
+pub mod ccc {
++    use printer_yanne::yanne;
+    pub fn adder(x: i32, y: i32) -> i32 {
+	return x + y;
+    }
+
++   pub fn check(x: i32, y: i32) {
++	    let num = adder(x, y);
++	    let text = format!("{:?}", num);
++	    yanne::print_yanne(text);
++   }
+}
+```
+- use文はmod内で宣言する。
+sub/Cargo.toml
+```diff
+[package]
+name = "sub"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
++ printer_yanne = { path="../printer_yanne"}
+```
+mainApp/src/main.rs
+```Rust
+use practice_rust::bbb;
+use sub::ccc;
+
+fn main() {
+    bbb::hello_from_bbb();
+    let num1: i32 = 3;
+    let num2: i32 = 5;
+    ccc::check(num1, num2);
+}
+```
+実行結果
+```
+hello from bbb.
+"8"やんね
 ```
